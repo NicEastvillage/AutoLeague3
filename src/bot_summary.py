@@ -18,12 +18,12 @@ def create_bot_summary(ld: LeagueDir):
         config = bots[bot_id]
         rank, mmr = [(i + 1, mrr) for i, (id, mrr, sigma) in enumerate(rank_list) if id == bot_id][0]
         return {
-            "name": config.name,
-            "developer": config.base_agent_config.get("Details", "developer"),
-            "description": config.base_agent_config.get("Details", "description"),
-            "fun_fact": config.base_agent_config.get("Details", "fun_fact"),
-            "github": config.base_agent_config.get("Details", "github"),
-            "language": config.base_agent_config.get("Details", "language"),
+            "name": config["settings"]["name"],
+            "developer": config["details"].get("developer", "N/A"),
+            "description": config["details"].get("description", "N/A"),
+            "fun_fact": config["details"].get("fun_fact", "N/A"),
+            "github": config["details"].get("github", "N/A"),
+            "language": config["details"].get("language", "N/A"),
             "rank": rank,
             "mmr": mmr,
         }

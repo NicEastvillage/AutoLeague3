@@ -3,12 +3,17 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Mapping, List, Dict, Optional
 
-from rlbot.matchconfig.conversions import read_match_config_from_file
-from rlbot.matchconfig.match_config import MatchConfig, PlayerConfig, Team
-from rlbot.parsing.bot_config_bundle import BotConfigBundle
+from rlbot.config import load_match_config, load_player_config, load_player_loadout
+from rlbot.flat import MatchConfiguration, PlayerConfiguration, PsyonixBot
+from rlbot_flatbuffers import PsyonixSkill
 
-from bots import BotID, psyonix_bot_skill
+from bots import BotID, BotTomlConfig
 from paths import PackageFiles, LeagueDir
+
+
+class Team:
+    BLUE = 0
+    ORANGE = 1
 
 
 @dataclass
@@ -46,26 +51,31 @@ class MatchDetails:
     result: Optional[MatchResult] = None
     replay_id: Optional[str] = None
 
-    def to_config(self, bots: Mapping[BotID, BotConfigBundle]) -> MatchConfig:
-        match_config = read_match_config_from_file(PackageFiles.default_match_config)
-        match_config.game_map = self.map
-        match_config.player_configs = [
-            self.bot_to_config(self.blue[0], bots, Team.BLUE),
-            self.bot_to_config(self.blue[1], bots, Team.BLUE),
-            self.bot_to_config(self.blue[2], bots, Team.BLUE),
-            self.bot_to_config(self.orange[0], bots, Team.ORANGE),
-            self.bot_to_config(self.orange[1], bots, Team.ORANGE),
-            self.bot_to_config(self.orange[2], bots, Team.ORANGE),
+    def to_config(self, bots: Mapping[BotID, BotTomlConfig]) -> MatchConfiguration:
+        match_config = load_match_config(PackageFiles.default_match_config)
+        match_config.game_map_upk = self.map
+        match_config.player_configurations = [
+            self.bot_to_config(bots[self.blue[0]], Team.BLUE),
+            self.bot_to_config(bots[self.blue[1]], Team.BLUE),
+            self.bot_to_config(bots[self.blue[2]], Team.BLUE),
+            self.bot_to_config(bots[self.orange[0]], Team.ORANGE),
+            self.bot_to_config(bots[self.orange[1]], Team.ORANGE),
+            self.bot_to_config(bots[self.orange[2]], Team.ORANGE),
         ]
         return match_config
 
-    def bot_to_config(self, bot: BotID, bots: Mapping[BotID, BotConfigBundle], team: Team) -> PlayerConfig:
-        config = PlayerConfig.bot_config(Path(bots[bot].config_path), team)
-        # Resolve Psyonix bots -- only Psyonix bots are in this list
-        if bot in psyonix_bot_skill:
-            config.rlbot_controlled = False
-            config.bot_skill = psyonix_bot_skill[bot]
-        return config
+    def bot_to_config(self, config: BotTomlConfig, team: int) -> PlayerConfiguration:
+        if (skill := config["settings"].get("psyonix_skill")) is not None:
+            # Psyonix bot
+            loadout = load_player_loadout(PackageFiles.psyonix_loadout, team)
+            pcfg = PlayerConfiguration(PsyonixBot(
+                name=config["settings"]["name"],
+                loadout=loadout,
+                bot_skill=PsyonixSkill(skill),
+            ), team)
+        else:
+            pcfg = load_player_config(config["path"], team)
+        return pcfg
 
     def save(self, ld: LeagueDir):
         self.write(ld.matches / f"{self.name}.json")

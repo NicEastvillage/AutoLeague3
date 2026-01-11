@@ -113,6 +113,5 @@ sheets-api-token.pickle
 credentials.json
 
 # League
-league/
-tt_league/
+leagues/
 settings.json

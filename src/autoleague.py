@@ -1,3 +1,4 @@
+import shutil
 import sys
 from pathlib import Path
 from typing import List
@@ -29,7 +30,6 @@ def parse_args(args: List[str]):
 
 Usage:
     autoleague setup league <league_dir>           Setup a league in <league_dir>
-    autoleague setup platform <steam|epic>         Set platform preference
     autoleague bot list [showRetired]              Print list of all known bots
     autoleague bot test <bot_id>                   Run test match using a specific bot
     autoleague bot details <bot_id>                Print details about the given bot
@@ -85,8 +85,7 @@ Usage:
 def parse_subcommand_setup(args: List[str]):
     assert args[0] == "setup"
     help_msg = """Usage:
-    autoleague setup league <league_dir>         Setup a league in <league_dir>
-    autoleague setup platform <steam|epic>       Set platform preference"""
+    autoleague setup league <league_dir>         Setup a league in <league_dir>"""
 
     if len(args) == 1 or args[1] == "help":
         print(help_msg)
@@ -103,17 +102,6 @@ def parse_subcommand_setup(args: List[str]):
         LeagueSettings().save(ld)
 
         print(f"Working directory successfully set to '{league_path}'")
-
-    elif args[1] == "platform" and len(args) == 3:
-
-        settings = PersistentSettings.load()
-        if args[2] in PersistentSettings.platforms:
-            settings.platform_preference = args[2]
-            settings.save()
-            print(f"Changed preferred platform to '{args[2]}'")
-
-        else:
-            print(f"Invalid platform '{args[2]}'. Valid platforms are {PersistentSettings.platforms}.")
 
     else:
         print(help_msg)
@@ -342,10 +330,27 @@ def parse_subcommand_match(args: List[str]):
         make_overlay(ld, match, bots)
         # Ask before starting?
         if args[1] == "run" or prompt_yes_no("Start match?", default="yes"):
-            result, replay = run_match(ld, match, bots, ReplayPreference.SAVE)
-            rank_sys.update(match, result)
+            result, replay = run_match(ld, match, bots, get_replay_data=True)
             match.result = result
-            match.replay_id = replay.replay_id
+
+            # Update ranks
+            rank_sys.update(match, result)
+
+            # Save replay
+            if replay is None:
+                print(f"WARNING: No replay was found for the match '{match.name}'.")
+            else:
+                match.replay_id = replay.replay_id
+
+                try:
+                    dst = ld.replays / f"{replay.replay_id}.replay"
+                    shutil.copy(replay.replay_path, dst)
+                    print("Replay successfully copied to replays directory")
+                except:
+                    print("WARNING: Fail to copy replay to replays directory.")
+
+                # if replay_preference == ReplayPreference.CALCULATED_GG:
+                #     upload_to_calculated_gg(replay.replay_path)
 
             # Save
             match.save(ld)

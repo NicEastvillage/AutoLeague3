@@ -5,9 +5,8 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Mapping
 
-from rlbot.parsing.bot_config_bundle import BotConfigBundle
-
-from bots import BotID, logo, defmt_bot_name, load_all_bots, fmt_bot_name, load_all_unretired_bots, load_retired_bots
+from bots import BotID, defmt_bot_name, load_all_unretired_bots, load_retired_bots, \
+    BotTomlConfig
 from leaguesettings import LeagueSettings
 from match import MatchDetails
 from match_maker import TicketSystem
@@ -15,7 +14,7 @@ from paths import PackageFiles, LeagueDir
 from ranking_system import RankingSystem
 
 
-def make_overlay(ld: LeagueDir, match: MatchDetails, bots: Mapping[BotID, BotConfigBundle]):
+def make_overlay(ld: LeagueDir, match: MatchDetails, bots: Mapping[BotID, BotTomlConfig]):
     """
     Make a `current_match.json` file which contains the details about the current
     match and its participants.
@@ -29,14 +28,14 @@ def make_overlay(ld: LeagueDir, match: MatchDetails, bots: Mapping[BotID, BotCon
         config = bots[bot_id]
         rank, mmr = [(i + 1, mrr) for i, (id, mrr, sigma) in enumerate(rank_list) if id == bot_id][0]
         return {
-            "name": config.name,
-            "config_path": str(config.config_path),
+            "name": config["settings"]["name"],
+            "config_path": str(config["path"]),
             "logo_path": try_copy_logo(config),
-            "developer": config.base_agent_config.get("Details", "developer"),
-            "description": config.base_agent_config.get("Details", "description"),
-            "fun_fact": config.base_agent_config.get("Details", "fun_fact"),
-            "github": config.base_agent_config.get("Details", "github"),
-            "language": config.base_agent_config.get("Details", "language"),
+            "developer": config["details"].get("developer", "N/A"),
+            "description": config["details"].get("description", "N/A"),
+            "fun_fact": config["details"].get("fun_fact", "N/A"),
+            "github": config["details"].get("github", "N/A"),
+            "language": config["details"].get("language", "N/A"),
             "rank": rank,
             "mmr": mmr,
         }
@@ -130,14 +129,14 @@ def make_summary(ld: LeagueDir, count: int):
     league_settings.save(ld)
 
 
-# Borrowed from RLBotGUI
-def try_copy_logo(bundle: BotConfigBundle):
-    logo_path = bundle.get_logo_file()
-    if logo_path is not None:
+def try_copy_logo(config: BotTomlConfig):
+    logo_path = config["settings"].get("logo_file", "logo.png")
+    logo_path = Path(config["path"]).parent / config["settings"].get("root_dir", "./") / logo_path
+    if logo_path.exists():
         root_folder = PackageFiles.overlay_dir
         folder = root_folder / 'images' / 'logos'
         folder.mkdir(parents=True, exist_ok=True)  # Ensure the folder exists
-        web_url = 'images/logos/' + convert_to_filename(logo_path)
+        web_url = 'images/logos/' + convert_to_filename(config["settings"]["name"] + ".png")
         target_file = root_folder / web_url
         shutil.copy(logo_path, target_file)
         return web_url

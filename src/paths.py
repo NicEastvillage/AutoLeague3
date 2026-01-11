@@ -74,12 +74,12 @@ class PackageFiles:
     _resource_dir = _package_dir / "resources"
     overlay_dir = _resource_dir / "overlay"
 
-    default_match_config = _resource_dir / "default_match_config.cfg"
+    default_match_config = _resource_dir / "default_match_config.toml"
 
-    psyonix_allstar = _resource_dir / "psyonix_allstar.cfg"
-    psyonix_pro = _resource_dir / "psyonix_pro.cfg"
-    psyonix_rookie = _resource_dir / "psyonix_rookie.cfg"
-    psyonix_appearance = _resource_dir / "psyonix_appearance.cfg"
+    psyonix_allstar = _resource_dir / "psyonix_allstar.bot.toml"
+    psyonix_pro = _resource_dir / "psyonix_pro.bot.toml"
+    psyonix_rookie = _resource_dir / "psyonix_rookie.bot.toml"
+    psyonix_loadout = _resource_dir / "psyonix.loadout.toml"
 
     overlay_current_match = overlay_dir / "current_match.json"
     overlay_summary = overlay_dir / "summary.json"

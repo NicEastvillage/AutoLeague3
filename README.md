@@ -1,28 +1,44 @@
-# AutoLeague2
+# AutoLeague3
 
-AutoLeague2 is a tool for running competitive leagues with custom Rocket League bots using the [RLBot framework](http://rlbot.org/).
-[Microsoft's TrueSkill](https://www.microsoft.com/en-us/research/project/trueskill-ranking-system/) ranking system is used to rate the bots.
+*AutoLeague3 is currently in beta and adds support for RLBot v5. See [AutoLeague2](https://github.com/NicEastvillage/AutoLeague2) for RLBot v4.*
+
+AutoLeague3 is a tool for running competitive leagues with custom Rocket League bots using the [RLBot framework](http://rlbot.org/).
+Microsoft's [TrueSkill](https://www.microsoft.com/en-us/research/project/trueskill-ranking-system/) ranking system is used to rate the bots.
 AutoLeague automates the process of selecting fair teams, starting matches, and rating the bots.
-It also ensures, that every bot gets to play regularly.
+It also ensures that every bot gets to play regularly.
 
-AutoLeague2 is a continuation of RLBot's [AutoLeaguePlay](https://github.com/RLBot/AutoLeaguePlay) and is used for [East's League Play](https://docs.google.com/document/d/1PzZ3UgBp36RO7V6iiXN3AnLioDUAW9jwgHpZXiFuvIg/edit#).  
+## V3 TODO
+
+* Move default match config to league folder such that the user can use it for launcher settings and match settings
+* Add logo to Psyonix bots
+* Rename setup command to settings
+* Allow bots to be stored elsewhere, symlink?
+* Mercy rule
+* Refactor the league model and merge the `bubblesort` branch
+* Make autoleague installable on cli
 
 ## How to use
 
-* Install [RLBotGUI](http://rlbot.org/).
-* Run `create-gui-venv.bat`. This creates a Python virtual environment based on RLBotGUI and installs the required packages.
-* Run `open-gui-venv.bat`. This opens the virtual environment and takes you to the autoleague directory.
-* Run `autoleague.py setup league <path/to/my/league/>` to create a league in the given directory.
+Setup:
+* Install [Python 3](https://www.python.org/downloads/) and [RLBot v5](http://rlbot.org/).
+* Install autoleague's dependencies `pip install -r requirements.txt`
+* Run `autoleague.py setup league <"path/to/my/league/">` to create a league in the given directory.
 * Add some bots to `path/to/my/league/bots/`.
-* Check if autoleague2 can find the bots with `autoleague.py bot list`.
+
+Usage:
+* Check if autoleague3 can find the bots with `autoleague.py bot list`.
+* Optionally, start the RLBot v5 Launcher if you want RLBot output in another console.
 * Test if a bot works with `autoleague.py bot test <bot_id>`.
-* Run `autoleague.py match run` to run a match.
-* Any **unfinished** matches (test or not) can be terminated without risk using `ctrl+C`.
-* The folder `autoleague/resources/overlay/` contains various overlays showing the state of the league and current match. Most notably:
+* Run `autoleague.py match run` or `autoleague.py match prepare` to run a match.
+* Terminate matches without risk using `ctrl+C`.
+* Change rlbot settings and match settings such as Steam/Epic launcher and mutators in `src/resources/default_match_config.toml`
+* See all commands further down.
+
+Extra:
+* The folder `src/resources/overlay/` contains various overlays showing the state of the league and current match. Most notably:
   * `summary.html` shows the leaderboard and the latest matches. Update the latter using `autoleague.py summary [n]`.
   * `ingame_leaderboard.html` shows only the leaderboard.
   * `overlay.html` shows the currently playing bots in two banners near the top.
-  * `tmcp-overlay/overlay/overlay.html` shows [TMCP](https://github.com/RLBot/RLBot/wiki/Team-Match-Communication-Protocol) messages sent between bots.
   * `versus_logos.html` shows the play bots and their logos on a big versus screen.
 
   You can show these overlays on stream using a browser source in OBS.
@@ -31,7 +47,7 @@ The entire state of the league is stored in the folder `path/to/my/league/`, whi
 
 ### East's League play
 
-I use AutoLeague2 for [East's League Play](https://docs.google.com/document/d/1PzZ3UgBp36RO7V6iiXN3AnLioDUAW9jwgHpZXiFuvIg/edit#). The league play is split in weeks, and each week I do the following steps:
+I use AutoLeague3 for [East's League Play](https://docs.google.com/document/d/1PzZ3UgBp36RO7V6iiXN3AnLioDUAW9jwgHpZXiFuvIg/edit#). The league play is split in weeks, and each week I do the following steps:
 
 * Before stream:
   * Make sure `path/to/my/league` is up-to-date
@@ -43,7 +59,7 @@ I use AutoLeague2 for [East's League Play](https://docs.google.com/document/d/1P
 
 * During stream:
   * Run `autoleague.py match run` to run a single match. Overlays, tickets, mmr, summary, and more updates automatically.
-  * Run `autoleague.py match prepare` to show off the playing bots before the match starts.
+    * Alternatively, `autoleague.py match prepare` prepares the next match and updates overlays, but it doesn't start without confirmation.
   * If needed, a match can be undone using `autoleague.py match undo`.
 
 ### All commands

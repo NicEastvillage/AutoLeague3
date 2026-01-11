@@ -1,0 +1,6 @@
+[rlbot]
+launcher = "Steam"
+
+[match]
+enable_state_setting = false
+auto_save_replay = true

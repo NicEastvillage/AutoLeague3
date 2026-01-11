@@ -9,9 +9,10 @@ import numpy
 import trueskill
 import itertools
 from pathlib import Path
-from rlbot.parsing.bot_config_bundle import BotConfigBundle, get_bot_config_bundle
 
-from bots import BotID, fmt_bot_name
+from rlbot.utils.maps import GAME_MAP_TO_UPK
+
+from bots import BotID, fmt_bot_name, BotTomlConfig
 from leaguesettings import LeagueSettings
 from match import MatchDetails
 from paths import LeagueDir, PackageFiles
@@ -39,7 +40,7 @@ class TicketSystem:
 
     def ensure(self, bots: Iterable[BotID]):
         """
-        Ensure that all bots in the given list has tickets in the ticket system.
+        Ensure that all bots in the given list have tickets in the ticket system.
         """
         for bot in bots:
             if bot not in self.tickets:
@@ -179,7 +180,7 @@ def pdf(x, mu: float = 0, sigma: float = 1):
 
 class MatchMaker:
     @staticmethod
-    def make_next(bots: Mapping[BotID, BotConfigBundle], rank_sys: RankingSystem,
+    def make_next(bots: Mapping[BotID, BotTomlConfig], rank_sys: RankingSystem,
                   ticket_sys: TicketSystem) -> MatchDetails:
         """
         Make the next match to play. This will use to TicketSystem and the RankingSystem to find
@@ -191,14 +192,14 @@ class MatchMaker:
         blue, orange = MatchMaker.decide_on_players_3(bots.keys(), rank_sys, ticket_sys)
         name = "_".join([time_stamp] + blue + ["vs"] + orange)
         map = choice([
-            "ChampionsField",
-            "DFHStadium",
-            "NeoTokyo",
-            "UrbanCentral",
-            "BeckwithPark",
-            "Mannfield",
-            "NeonFields",
-            "UtopiaColiseum",
+            GAME_MAP_TO_UPK["ChampionsField"],
+            GAME_MAP_TO_UPK["DFHStadium"],
+            GAME_MAP_TO_UPK["NeoTokyo"],
+            GAME_MAP_TO_UPK["UrbanCentral"],
+            GAME_MAP_TO_UPK["BeckwithPark"],
+            GAME_MAP_TO_UPK["Mannfield"],
+            GAME_MAP_TO_UPK["NeonFields"],
+            GAME_MAP_TO_UPK["UtopiaColiseum"],
         ])
         return MatchDetails(time_stamp, name, blue, orange, map)
 
@@ -370,10 +371,9 @@ class MatchMaker:
 
     @staticmethod
     def make_test_match(bot_id: BotID) -> MatchDetails:
-        allstar_config = get_bot_config_bundle(PackageFiles.psyonix_allstar)
-        allstar_id = fmt_bot_name(allstar_config.name)
+        allstar_id = fmt_bot_name('Psyonix All-Star')
         team = [bot_id, allstar_id, allstar_id]
-        return MatchDetails("", f"test_{bot_id}", team, team, "ChampionsField")
+        return MatchDetails("", f"test_{bot_id}", team, team, GAME_MAP_TO_UPK["ChampionsField"])
 
 
 def make_timestamp() -> str:

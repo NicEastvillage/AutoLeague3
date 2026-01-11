@@ -18,7 +18,7 @@ class ReplayPreference(Enum):
 def upload_to_calculated_gg(replay_path: Path):
     with open(replay_path, 'rb') as f:
         response = requests.post('https://calculated.gg/api/upload', files={'replays': f})
-        print(f'upload response to {replay_path.name}: {response}')
+        print(f'Calculated.gg upload response to {replay_path.name}: {response}')
 
 
 @dataclass
@@ -35,8 +35,6 @@ def parse_replay_id(replay_path: Path) -> str:
 
 @dataclass
 class ReplayMonitor(Metric):
-
-    replay_preference: ReplayPreference
 
     replay_path: Path = None
     replay_id: str = None
@@ -64,8 +62,6 @@ class ReplayMonitor(Metric):
                 assert event.src_path.endswith('.replay')
                 nonlocal replay_monitor
                 replay_path = Path(event.src_path)
-                if replay_monitor.replay_preference == ReplayPreference.CALCULATED_GG:
-                    upload_to_calculated_gg(replay_path)
                 replay_monitor.replay_id = parse_replay_id(replay_path)
                 replay_monitor.replay_path = replay_path
 
