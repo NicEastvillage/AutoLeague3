@@ -1,0 +1,42 @@
+{
+    "ladder": [
+        "King",
+        "Beast from the East",
+        "Psyonix All-Star",
+        "[RLBC25] Azure 18",
+        "Psyonix Pro",
+        "Psyonix Rookie"
+    ],
+    "cur": -2,
+    "direction": -1,
+    "known_cmps": [
+        {
+            "better": 4,
+            "worse": 5
+        },
+        {
+            "better": 2,
+            "worse": 4
+        },
+        {
+            "better": 2,
+            "worse": 3
+        },
+        {
+            "better": 0,
+            "worse": 2
+        },
+        {
+            "better": 0,
+            "worse": 1
+        },
+        {
+            "better": 1,
+            "worse": 2
+        },
+        {
+            "better": 3,
+            "worse": 4
+        }
+    ]
+}

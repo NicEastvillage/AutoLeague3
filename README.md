@@ -10,11 +10,14 @@ It also ensures that every bot gets to play regularly.
 ## V3 TODO
 
 * Move default match config to league folder such that the user can use it for launcher settings and match settings
+* Add an option for team size
+* Add an option for whether teams are mixed bots or copies
+* Add an option for whether Psyonix bots are included
 * Add logo to Psyonix bots
 * Rename setup command to settings
 * Allow bots to be stored elsewhere, symlink?
 * Mercy rule
-* Refactor the league model and merge the `bubblesort` branch
+* Refactor the league model and merge the `bubblesort` and `triple-threat` branch
 * Make autoleague installable on cli
 
 ## How to use
